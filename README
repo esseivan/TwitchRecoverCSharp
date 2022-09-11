@@ -1,0 +1,40 @@
+Twitch Recover
+==============
+
+A java program to retrieve URL links of livestreams and VODs.
+
+This is a C# port of this repository
+	https://github.com/3N4N/TwitchRecover
+Which is itself based on this one
+    https://github.com/TwitchRecover/TwitchRecover
+
+
+Requirements
+------------
+
+- Minimum
+  - Java > 8
+- Recommended
+  - Java 17
+
+
+How to Run
+----------
+
+- On Windows
+
+    .\gradlew.bat build
+    java -jar build\libs\TwitchRecover.jar
+
+- On Linux
+
+    ./gradlew build
+    java -jar build\libs\TwitchRecover.jar
+
+
+Issues
+------
+
+If you face any problem, specially any bug, open an issue in the github repo.
+
+    https://github.com/esseivan/TwitchRecoverCS
