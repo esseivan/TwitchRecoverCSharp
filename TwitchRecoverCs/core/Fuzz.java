@@ -15,9 +15,9 @@
  *  Twitch Recover repository: https://github.com/TwitchRecover/TwitchRecover
  */
 
-package core;
+package TwitchRecover.Core;
 
-import core.Enums.Quality;
+import TwitchRecover.Core.Enums.Quality;
 
 import java.io.BufferedReader;
 import java.io.IOException;

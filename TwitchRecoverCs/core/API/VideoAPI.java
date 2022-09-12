@@ -15,13 +15,13 @@
  *  Twitch Recover repository: https://github.com/TwitchRecover/TwitchRecover
  */
 
-package core.API;
+package TwitchRecover.Core.API;
 
-import core.Compute;
-import core.Enums.FileExtension;
-import core.Enums.Quality;
-import core.Feeds;
-import core.Fuzz;
+import TwitchRecover.Core.Compute;
+import TwitchRecover.Core.Enums.FileExtension;
+import TwitchRecover.Core.Enums.Quality;
+import TwitchRecover.Core.Feeds;
+import TwitchRecover.Core.Fuzz;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;

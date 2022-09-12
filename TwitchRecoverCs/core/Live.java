@@ -15,13 +15,16 @@
  *  Twitch Recover repository: https://github.com/TwitchRecover/TwitchRecover
  */
 
-package core;
+package TwitchRecover.Core;
 
-import java.util.Objects;
+import TwitchRecover.Core.API.LiveAPI;
+import TwitchRecover.Core.Enums.ContentType;
+import TwitchRecover.Core.Enums.FileExtension;
 
-import core.API.LiveAPI;
-import core.Enums.ContentType;
-import core.Enums.FileExtension;
+
+https://github.com/3N4N/TwitchRecover/commit/718bec3265013e6c3f55103c90d5b76128add7f2
+
+
 
 /**
  * The object class for
@@ -43,12 +46,13 @@ public class Live {
     }
 
     /**
-     * Retrieve all of the live feeds of a channel.
+     * Method which retrieves
+     * all of the live feeds
+     * of a channel.
      * @return Feeds    Feeds object containing all of the feeds of the live stream.
      */
     public Feeds retrieveFeeds(){
-        feeds = LiveAPI.getLiveFeeds(channel);
-        feeds.getQualities().removeIf(Objects::isNull);
+        feeds= LiveAPI.getLiveFeeds(channel);
         return feeds;
     }
 

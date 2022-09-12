@@ -5,6 +5,8 @@ VisualStudioVersion = 17.3.32804.467
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwitchRecoverGui", "TwitchRecoverGui\TwitchRecoverGui.csproj", "{5D0BBA48-86A6-4244-A86C-328FB69F8995}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwitchRecoverCs", "TwitchRecoverCs\TwitchRecoverCs.csproj", "{7BDE28A6-5651-416A-B441-99AC05417748}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{5D0BBA48-86A6-4244-A86C-328FB69F8995}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D0BBA48-86A6-4244-A86C-328FB69F8995}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D0BBA48-86A6-4244-A86C-328FB69F8995}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BDE28A6-5651-416A-B441-99AC05417748}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BDE28A6-5651-416A-B441-99AC05417748}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BDE28A6-5651-416A-B441-99AC05417748}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BDE28A6-5651-416A-B441-99AC05417748}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

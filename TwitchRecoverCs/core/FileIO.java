@@ -15,10 +15,10 @@
  *  Twitch Recover repository: https://github.com/TwitchRecover/TwitchRecover
  */
 
-package core;
+package TwitchRecover.Core;
 
-import core.Enums.ContentType;
-import core.Enums.FileExtension;
+import TwitchRecover.Core.Enums.ContentType;
+import TwitchRecover.Core.Enums.FileExtension;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;

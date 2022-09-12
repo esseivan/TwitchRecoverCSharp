@@ -15,7 +15,7 @@
  *  Twitch Recover repository: https://github.com/TwitchRecover/TwitchRecover
  */
 
-package core;
+package TwitchRecover.Core;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

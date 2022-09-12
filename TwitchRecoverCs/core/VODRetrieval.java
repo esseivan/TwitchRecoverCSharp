@@ -15,14 +15,13 @@
  *  Twitch Recover repository: https://github.com/TwitchRecover/TwitchRecover
  */
 
-package core;
+package TwitchRecover.Core;
 
-import core.Downloader.Download;
+import TwitchRecover.Core.Downloader.Download;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-
 /**
  * The VOD retrieval class is the class that orchestrates
  * all of the VOD retrieval and is what is called by the

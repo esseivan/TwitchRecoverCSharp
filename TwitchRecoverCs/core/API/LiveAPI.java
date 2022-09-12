@@ -15,9 +15,9 @@
  *  Twitch Recover repository: https://github.com/TwitchRecover/TwitchRecover
  */
 
-package core.API;
+package TwitchRecover.Core.API;
 
-import core.Feeds;
+import TwitchRecover.Core.Feeds;
 
 /**
  * This class handles all

@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>7bde28a6-5651-416a-b441-99ac05417748</ProjectGuid>
+    <ProjectGuid>{7BDE28A6-5651-416A-B441-99AC05417748}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TwitchRecoverCs</RootNamespace>
@@ -31,24 +31,61 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System"/>
-    
-    <Reference Include="System.Core"/>
-    <Reference Include="System.Xml.Linq"/>
-    <Reference Include="System.Data.DataSetExtensions"/>
-    
-    
-    <Reference Include="Microsoft.CSharp"/>
-    
-    <Reference Include="System.Data"/>
-    
-    <Reference Include="System.Net.Http"/>
-    
-    <Reference Include="System.Xml"/>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="core\Compute.cs" />
+    <Compile Include="core\Downloader\Download.cs" />
+    <Compile Include="core\Downloader\FileHandler.cs" />
+    <Compile Include="core\Enums\ContentType.cs" />
+    <Compile Include="core\Enums\FileExtension.cs" />
+    <Compile Include="core\Enums\Quality.cs" />
+    <Compile Include="core\Enums\Timeout.cs" />
+    <Compile Include="core\Feeds.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="client\CLI.java" />
+    <Content Include="client\CLIHandler.java" />
+    <Content Include="client\Enums\oType.java" />
+    <Content Include="client\Enums\vType.java" />
+    <Content Include="client\Handlers\ClipHandler.java" />
+    <Content Include="client\Handlers\CoreHandler.java" />
+    <Content Include="client\Handlers\HighlightHandler.java" />
+    <Content Include="client\Handlers\MassHandler.java" />
+    <Content Include="client\Handlers\StreamHandler.java" />
+    <Content Include="client\Handlers\VideoHandler.java" />
+    <Content Include="client\Handlers\VODHandler.java" />
+    <Content Include="client\Prompts.java" />
+    <Content Include="core\API\API.java" />
+    <Content Include="core\API\ClipsAPI.java" />
+    <Content Include="core\API\LiveAPI.java" />
+    <Content Include="core\API\VideoAPI.java" />
+    <Content Include="core\Clips.java" />
+    <Content Include="core\Converter.java" />
+    <Content Include="core\Downloader\Download.java" />
+    <Content Include="core\Downloader\FileHandler.java" />
+    <Content Include="core\Downloader\M3U8Handler.java" />
+    <Content Include="core\FileIO.java" />
+    <Content Include="core\Fuzz.java" />
+    <Content Include="core\Highlights.java" />
+    <Content Include="core\Libraries\ffmpeg.exe" />
+    <Content Include="core\Libraries\youtube-dl.exe" />
+    <Content Include="core\Live.java" />
+    <Content Include="core\Mass\MassCore.java" />
+    <Content Include="core\Mass\MassDownload.java" />
+    <Content Include="core\Mass\MassRecover.java" />
+    <Content Include="core\VOD.java" />
+    <Content Include="core\VODRetrieval.java" />
+    <Content Include="core\WebsiteRetrieval.java" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
- </Project>
+</Project>

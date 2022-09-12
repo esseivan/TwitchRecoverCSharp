@@ -15,11 +15,12 @@
  *  Twitch Recover repository: https://github.com/TwitchRecover/TwitchRecover
  */
 
-package core;
+package TwitchRecover.Core;
 
-import core.API.VideoAPI;
-import core.Enums.ContentType;
-import core.Enums.FileExtension;
+import TwitchRecover.Core.API.VideoAPI;
+import TwitchRecover.Core.Downloader.Download;
+import TwitchRecover.Core.Enums.ContentType;
+import TwitchRecover.Core.Enums.FileExtension;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,6 +56,28 @@ public class VOD {
         if(isDeleted){
             vodInfo=new String[4];
         }
+    }
+
+    /**
+     * This method processes the downloading of a
+     * VOD.
+     * @param fe    FileExtension enum representing the desired output file extension.
+     * @param feed  String value representing the desired feed to download.
+     */
+    public void downloadVOD(FileExtension fe, String feed){
+        computeFN();
+        if(vodInfo==null){
+            getVODFeeds();
+        }
+        else{
+            retrieveVOD(false);
+            retrieveVODFeeds();
+        }
+        fFP=fp+fn+fe.fileExtension;
+        try {
+            Download.m3u8Download(feed, fFP);
+        }
+        catch (IOException ignored){}
     }
 
     /**

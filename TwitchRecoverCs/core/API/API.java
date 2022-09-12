@@ -15,13 +15,13 @@
  *  Twitch Recover repository: https://github.com/TwitchRecover/TwitchRecover
  */
 
-package core.API;
+package TwitchRecover.Core.API;
 
-import core.Compute;
-import core.Enums.Quality;
-import core.Enums.Timeout;
-import core.Feeds;
-import core.FileIO;
+import TwitchRecover.Core.Compute;
+import TwitchRecover.Core.Enums.Quality;
+import TwitchRecover.Core.Enums.Timeout;
+import TwitchRecover.Core.Feeds;
+import TwitchRecover.Core.FileIO;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -29,7 +29,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.json .JSONObject;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -39,6 +39,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+
+https://github.com/3N4N/TwitchRecover/commit/d093eebdd4349a726e6afef30f1f964e78239c0e
+
 
 /**
  * This class handles all of the
@@ -71,11 +75,7 @@ public class API {
                         Double fps = 0.000;
                         if(mF.find()) {
                             String vid = mF.group(1);
-                            // Handle resolutions like 720p w/o fps attribute like 720p30fps
-                            if (vid.indexOf('p') == vid.length() - 1)
-                                fps = 60.00;
-                            else
-                                fps = Double.parseDouble(vid.substring(vid.indexOf('p') + 1));
+                            fps = Double.parseDouble(vid.substring(vid.indexOf('p') + 1));
                         }
                         //Get the resolution of the source resolution.
                         String pattern = "#EXT-X-STREAM-INF:BANDWIDTH=\\d*,RESOLUTION=(\\d*x\\d*),CODECS=\"[a-zA-Z0-9.]*,[a-zA-Z0-9.]*\",VIDEO=\"chunked\"";

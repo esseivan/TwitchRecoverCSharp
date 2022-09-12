@@ -15,9 +15,9 @@
  *  Twitch Recover repository: https://github.com/TwitchRecover/TwitchRecover
  */
 
-package core.Downloader;
+package TwitchRecover.Core.Downloader;
 
-import core.Enums.FileExtension;
+import TwitchRecover.Core.Enums.FileExtension;
 import lombok.Cleanup;
 import org.apache.commons.io.IOUtils;
 import java.io.*;
