@@ -41,6 +41,7 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(776, 20);
             this.textBox1.TabIndex = 0;
+            this.textBox1.Text = "https://www.twitch.tv/videos/1573171873";
             // 
             // label1
             // 

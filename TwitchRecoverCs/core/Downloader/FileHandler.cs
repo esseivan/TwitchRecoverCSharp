@@ -30,7 +30,7 @@ namespace TwitchRecoverCs.core.Downloader
      */
     internal class FileHandler
     {
-        protected static string TEMP_FOLDER_PATH;    //Variable which holds the folder path of the temp folder.
+        public static string TEMP_FOLDER_PATH;    //Variable which holds the folder path of the temp folder.
         protected static FolderDestroyer FD = null;
 
         /**
@@ -38,15 +38,35 @@ namespace TwitchRecoverCs.core.Downloader
          * files (M3U8 parts) will be saved.
          * @throws IOException
          */
-        protected static void createTempFolder()
+        internal static void createTempFolder()
         {
             if (FD != null)
                 FD.Dispose();
 
-            TEMP_FOLDER_PATH = Path.GetTempPath();
-            string tempDirectory = Path.Combine(TEMP_FOLDER_PATH, string.Format("TwitchRecover-{0}", Path.GetRandomFileName().Split('.')[0]));
+            string tempDirectory = Path.Combine(Path.GetTempPath(), string.Format("TwitchRecover-{0}", Path.GetRandomFileName().Split('.')[0]));
             Directory.CreateDirectory(tempDirectory);
             FD = new FolderDestroyer(tempDirectory);
+            TEMP_FOLDER_PATH = tempDirectory;
+        }
+
+        /**
+         * This method create a temp file and give the
+         * full path to it
+         * @param name                          The prefix of the temp file
+         * @param extension                     The suffix of the temp file. The dot must be included for an extension
+         * @return string                       The path to the file
+         */
+        internal static FileDestroyer createTempFile(string name, string extension)
+        {
+            if (TEMP_FOLDER_PATH == null) createTempFolder();
+
+            string tempPath = Path.Combine(/*TEMP_FOLDER_PATH*/Path.GetTempPath(),
+                string.Format("{0}{1}{2}",
+                    name,
+                    Path.GetFileNameWithoutExtension(Path.GetRandomFileName()),
+                    extension));
+            //File.Create(tempPath).Close();
+            return new FileDestroyer(tempPath);
         }
 
         /**
@@ -56,7 +76,7 @@ namespace TwitchRecoverCs.core.Downloader
          * @param segmentMap    Navigable map holding the index and file objects of all the segment files.
          * @param fp            Final file path of the file.
          */
-        protected static string mergeFile(SortedDictionary<int, string> segmentMap, string fp)
+        internal static string mergeFile(SortedDictionary<int, string> segmentMap, string fp)
         {
             using (var outputStream = File.Create(fp))
             {
@@ -73,28 +93,71 @@ namespace TwitchRecoverCs.core.Downloader
             return fp;
         }
 
-        /// <summary>
-        /// Solution to replace tempDir.deleteOnExit();
-        /// </summary>
-        protected class FolderDestroyer : IDisposable
+    }
+    /// <summary>
+    /// Solution to replace tempDir.deleteOnExit();
+    /// </summary>
+    public class FolderDestroyer : IDisposable
+    {
+        protected readonly string Path;
+
+        public string FilePath => Path;
+
+        public static implicit operator string(FolderDestroyer fd)
         {
-            protected readonly string Path;
+            return fd.FilePath;
+        }
 
-            internal FolderDestroyer(string p)
-            {
-                Path = p;
-            }
+        public FolderDestroyer(string p)
+        {
+            Path = p;
+        }
 
-            ~FolderDestroyer()
-            {
-                Dispose();
-            }
+        ~FolderDestroyer()
+        {
+            Dispose();
+        }
 
-            public void Dispose()
-            {
-                if (Directory.Exists(Path))
-                    Directory.Delete(Path);
-            }
+        public void Dispose()
+        {
+            if (Directory.Exists(Path))
+                Directory.Delete(Path);
+        }
+    }
+
+    /// <summary>
+    /// Solution to replace tempFile.deleteOnExit();
+    /// </summary>
+    public class FileDestroyer : IDisposable
+    {
+        protected readonly string Path;
+
+        public string FilePath => Path;
+
+        public static implicit operator string(FileDestroyer fd)
+        {
+            return fd.FilePath;
+        }
+
+        public FileDestroyer(string p)
+        {
+            Path = p;
+        }
+
+        ~FileDestroyer()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (File.Exists(Path))
+                File.Delete(Path);
+        }
+
+        public override string ToString()
+        {
+            return FilePath;
         }
     }
 }

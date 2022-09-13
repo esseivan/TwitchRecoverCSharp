@@ -5,9 +5,12 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using TwitchRecoverCs.core.Enums;
+using TwitchRecoverCs.core;
 
 namespace TwitchRecoverGui
 {
@@ -20,25 +23,21 @@ namespace TwitchRecoverGui
             Console.WriteLine("Ready");
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void download()
         {
-            ProcessStartInfo pi = new ProcessStartInfo("java", " -jar TwitchRecover.jar")
-            {
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                UseShellExecute = false
-            };
-            Process p = new Process()
-            {
-                StartInfo = pi
-            };
+            Console.WriteLine("\nVOD downloading:");
+            string url = textBox1.Text;
+            VOD vod = new VOD(false);
+            vod.retrieveID(url);
+            Feeds feeds = vod.getVODFeeds();
 
-
+            Console.WriteLine(feeds);
         }
 
-        private void P_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
-            Console.WriteLine(e.Data);
+            download();
+
         }
     }
 }

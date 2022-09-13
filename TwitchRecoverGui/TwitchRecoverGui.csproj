@@ -84,5 +84,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TwitchRecoverCs\TwitchRecoverCs.csproj">
+      <Project>{7bde28a6-5651-416a-b441-99ac05417748}</Project>
+      <Name>TwitchRecoverCs</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -39,7 +39,7 @@ namespace TwitchRecoverCs.core
          * in standard timestamp form.
          * @return String       String value representing the completed latter part of the URL.
          */
-        protected static string URLCompute(string name, long streamID, long timestamp)
+        public static string URLCompute(string name, long streamID, long timestamp)
         {
             var baseString = name + "_" + streamID.ToString() + "_" + timestamp.ToString();
             var hash = Compute.hash(baseString);
@@ -53,7 +53,7 @@ namespace TwitchRecoverCs.core
          * @param ts        String value representing the timestamp.
          * @return long     Long value which represents the UNIX timestamp.
          */
-        protected static long getUNIX(string ts)
+        public static long getUNIX(string ts)
         {
             var time = ts + " UTC";
             string DateTimeFormat = "yyyy-MM-dd HH:mm:ss zzz";
@@ -103,10 +103,10 @@ namespace TwitchRecoverCs.core
         public static string singleRegex(string pattern, string value)
         {
             Regex p = new Regex(pattern);
-            var m = p.Matches(value);
-            if (m.Count > 0)
+            var m = p.Match(value);
+            if (m.Success)
             {
-                return m[0].Groups[1].ToString();
+                return m.Groups[1].ToString();
             }
             return null;
         }
