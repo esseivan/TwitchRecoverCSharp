@@ -1,6 +1,3 @@
-<a href="https://paypal.me/daylamtayari"><img src="https://img.shields.io/badge//daylamtayari-%2300457C.svg?&style=for-the-badge&logo=PayPal&logoColor=white&labelColor=black"></a> 
-<a href="https://cash.app/$daylamtayari"><img src="https://img.shields.io/badge//$daylamtayari-%2300C244.svg?&style=for-the-badge&logo=Cash-App&logoColor=white&labelColor=black"></a> 
-<a href="https://www.blockchain.com/btc/address/15KcKrsqW6DQdyZPrgRXXmsKkyyZzHAQVX"><img src="https://img.shields.io/badge/15KcKrsqW6DQdyZPrgRXXmsKkyyZzHAQVX-%23F7931A.svg?&style=for-the-badge&logo=bitcoin&logoColor=white&labelColor=black"></a>
 
 # Twitch Recover
 
