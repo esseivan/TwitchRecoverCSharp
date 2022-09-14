@@ -18,6 +18,8 @@ using System.Diagnostics.Tracing;
 using System.Security;
 using System.IO;
 using System.Reflection;
+using System.Security.Policy;
+using System.Threading;
 
 namespace TwitchRecoverGui
 {
@@ -29,6 +31,8 @@ namespace TwitchRecoverGui
         private int chunkMax = 0;
         private float approxChunkSize_MB = 0;
         private int approxTotalSize_MB = 0;
+
+        private CancellationTokenSource cts;
 
         public Form1()
         {
@@ -49,7 +53,14 @@ namespace TwitchRecoverGui
 
             vod.setFP(filePath);
             Console.WriteLine("\nDownloading...");
-            string result = await vod.downloadVOD(feeds.getFeed(index));
+            cts = new CancellationTokenSource();
+            string result = await vod.downloadVOD(feeds.getFeed(index), cts.Token);
+
+            if (string.IsNullOrEmpty(result))
+            {
+                MessageBox.Show("Download cancelled");
+                return;
+            }
 
             label3.Text = toolStripStatusLabel2.Text = string.Empty;
             toolStripStatusLabel1.Text = "Complete !";
@@ -135,18 +146,19 @@ namespace TwitchRecoverGui
             {
                 success = GetActiveVODFeeds(url);
             }
-            catch (Exception) { }
-            if (success) return;
-
-            try
+            catch (Exception ex)
             {
-                // Need OAuth
-                //success = GetDeletedVODFeeds(url);
+                Console.WriteLine(ex.Message);
             }
-            catch (Exception) { }
             if (success) return;
 
-
+            //try
+            //{
+            //    // Need OAuth
+            //    //success = GetDeletedVODFeeds(url);
+            //}
+            //catch (Exception) { }
+            //if (success) return;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -159,8 +171,6 @@ namespace TwitchRecoverGui
             GetVOD(textBox1.Text);
             if (feeds != null && feeds.GetCount() != 0)
                 comboBox1.Items.AddRange(feeds.getQualities().ToArray());
-
-
 
             Cursor = Cursors.Default;
             Console.WriteLine(s.ElapsedMilliseconds);
@@ -208,6 +218,16 @@ namespace TwitchRecoverGui
         {
             // Ask confirmation if download in progress
             // and Cancel all tasks if asked
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            if (cts == null)
+                return;
+            if (cts.IsCancellationRequested)
+                return;
+            cts.Cancel();
+            cts.Dispose();
         }
     }
 }

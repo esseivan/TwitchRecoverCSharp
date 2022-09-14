@@ -163,7 +163,7 @@ namespace TwitchRecoverCs.core.API
             bool added = false;
             try
             {
-                Uri dUrl = new Uri("https://raw.githubusercontent.com/TwitchRecover/TwitchRecover/main/domains.txt");
+                Uri dUrl = new Uri("https://raw.githubusercontent.com/esseivan/TwitchRecoverCS/main/domains.txt");
 
                 HttpWebRequest request = WebRequest.CreateHttp(dUrl);
                 request.UserAgent = "Mozilla/5.0";

@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using TwitchRecoverCs.core.API;
 using TwitchRecoverCs.core.Downloader;
@@ -69,7 +70,7 @@ namespace TwitchRecoverCs.core
          * @param fe    FileExtension enum representing the desired output file extension.
          * @param feed  string value representing the desired feed to download.
          */
-        public async void downloadVOD(FileExtension fe, string feed)
+        public async void downloadVOD(FileExtension fe, string feed, CancellationToken token)
         {
             computeFN();
             //if (vodInfo == null)
@@ -84,7 +85,7 @@ namespace TwitchRecoverCs.core
             fFP = fp + fn + fe.fileExtension;
             try
             {
-                await Download.m3u8Download(feed, fFP);
+                await Download.m3u8Download(feed, fFP, token);
             }
             catch (IOException ex)
             {
@@ -98,13 +99,13 @@ namespace TwitchRecoverCs.core
          * @param fe    FileExtension enum representing the desired output file extension.
          * @param feed  string value representing the desired feed to download.
          */
-        public async Task<string> downloadVOD(string feed)
+        public async Task<string> downloadVOD(string feed, CancellationToken token)
         {
             fFP = fp;
             string result = null;
             try
             {
-                result = await Download.m3u8Download(feed, fFP);
+                result = await Download.m3u8Download(feed, fFP, token);
             }
             catch (IOException ex)
             {

@@ -237,6 +237,7 @@ namespace TwitchRecoverCs.core
 
             userID = user.GetProperty("_id").GetString();
 
+            // This API also looks like to be outdated
             //Retrieve stream values:
             string dataJSON = getJSON("https://alla.streamscharts.com/api/free/streaming/platforms/1/channels/" + userID + "/streams/" + results[1] + "/statuses");
 

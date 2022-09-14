@@ -45,6 +45,7 @@
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
+            this.button5 = new System.Windows.Forms.Button();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -137,6 +138,7 @@
             // saveFileDialog1
             // 
             this.saveFileDialog1.Filter = "MP4 files|*.mp4|All files|*.*";
+            this.saveFileDialog1.Title = "Save As";
             // 
             // button3
             // 
@@ -192,11 +194,22 @@
             this.label5.TabIndex = 13;
             this.label5.Text = "Unable to download Audio for now";
             // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(663, 409);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(125, 23);
+            this.button5.TabIndex = 14;
+            this.button5.Text = "Cancel download";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.button5);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.textBox2);
@@ -240,6 +253,7 @@
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Button button5;
     }
 }
 

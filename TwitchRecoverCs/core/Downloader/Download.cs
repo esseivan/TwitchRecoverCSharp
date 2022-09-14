@@ -23,6 +23,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Security.Policy;
 using System.Text;
@@ -66,12 +67,14 @@ namespace TwitchRecoverCs.core.Downloader
         }
 
         private static SortedDictionary<int, FileDestroyer> segmentMap = null;
-        public async static Task<string> m3u8Download(string url, string fp)
+        public async static Task<string> m3u8Download(string url, string fp, CancellationToken token)
         {
             FileHandler.createTempFolder();
             List<string> chunks = M3U8Handler.getChunks(url);
             DownloadStarted?.Invoke(url, chunks.Count);
-            segmentMap = await TSDownload(chunks);
+            segmentMap = await TSDownload(chunks, token);
+            if (segmentMap == null)
+                return null;
             string result = FileHandler.mergeFile(segmentMap, fp);
             return result;
         }
@@ -94,7 +97,7 @@ namespace TwitchRecoverCs.core.Downloader
          * @return File     File object of the file that will be downloaded and is returned.
          * @throws IOException
          */
-        public static async Task<FileDestroyer> tempDownloadAsync(string url)
+        public static async Task<FileDestroyer> tempDownloadAsync(string url, CancellationToken token)
         {
             string prefix = Path.GetFileNameWithoutExtension(url);
 
@@ -108,9 +111,15 @@ namespace TwitchRecoverCs.core.Downloader
             }
 
             FileDestroyer downloadedFile = FileHandler.createTempFile(prefix + "-", Path.GetExtension(url));    //Creates the temp file.
+
             using (WebClient wc = new WebClient())
             {
-                await wc.DownloadFileTaskAsync(new Uri(url), downloadedFile);
+                var downloadTask = wc.DownloadFileTaskAsync(new Uri(url), downloadedFile);
+
+                using (token.Register(() => wc.CancelAsync()))
+                {
+                    await downloadTask;
+                }
             }
 
             return downloadedFile;
@@ -152,11 +161,20 @@ namespace TwitchRecoverCs.core.Downloader
          * @param links                         Arraylist holding all of the links to download.
          * @return NavigableMap<Integer, File>  Navigable map holdding the index and file objects of each TS segment.
          */
-        private async static Task<SortedDictionary<int, FileDestroyer>> TSDownload(List<string> links)
+        private async static Task<SortedDictionary<int, FileDestroyer>> TSDownload(List<string> links, CancellationToken token)
         {
             SortedDictionary<int, FileDestroyer> segmentMap = new SortedDictionary<int, FileDestroyer>();
             ConcurrentQueue<string> downloadQueue = new ConcurrentQueue<string>(links);
             ConcurrentQueue<FileDestroyer> downloadedQueue = new ConcurrentQueue<FileDestroyer>();
+
+            // https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskscheduler?redirectedfrom=MSDN&view=net-6.0
+
+            // Create a scheduler that uses 10 threads.
+            LimitedConcurrencyLevelTaskScheduler lcts = new LimitedConcurrencyLevelTaskScheduler(10);
+            List<Task> tasks = new List<Task>();
+            // Create a TaskFactory and pass it our custom scheduler.
+            TaskFactory factory = new TaskFactory(lcts);
+            // Use our factory to run a set of tasks.
 
             int index = 0;
             while (!downloadQueue.IsEmpty)
@@ -166,7 +184,7 @@ namespace TwitchRecoverCs.core.Downloader
                 int finalIndex = index;
 
                 // Downloader task
-                await Task.Factory.StartNew(async () =>
+                Task t = await Task.Factory.StartNew(async () =>
                 {
                     int currentTries = 1;
                     if (downloadQueue.TryDequeue(out string item))
@@ -177,7 +195,7 @@ namespace TwitchRecoverCs.core.Downloader
                             string threadItem = item;
                             try
                             {
-                                FileDestroyer tempTS = await tempDownloadAsync(threadItem);
+                                FileDestroyer tempTS = await tempDownloadAsync(threadItem, token);
                                 segmentMap[threadIndex] = tempTS;
                                 ChunkDownloaded?.Invoke(tempTS, threadIndex);
                                 // This thread is done
@@ -191,18 +209,137 @@ namespace TwitchRecoverCs.core.Downloader
                             }
                         }
                     }
-                    // IF an error occured, input a invalid one
+                    // If an error occured, input a invalid one
                     downloadedQueue.Enqueue(new FileDestroyer(item));
-                });
+                }, token);
+                tasks.Add(t);
             }
 
-            while (downloadedQueue.Count != links.Count)
-            {
-                Console.WriteLine(string.Format("Waiting for download... Currently at {0}/{1}", downloadedQueue.Count, links.Count));
-                await Task.Delay(100);
-            }
+            Task.WaitAll(tasks.ToArray());
+            Console.WriteLine("\n\nSuccessful completion.");
 
             return segmentMap;
+        }
+    }
+
+    // Provides a task scheduler that ensures a maximum concurrency level while
+    // running on top of the thread pool.
+    public class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
+    {
+        // Indicates whether the current thread is processing work items.
+        [ThreadStatic]
+        private static bool _currentThreadIsProcessingItems;
+
+        // The list of tasks to be executed
+        private readonly LinkedList<Task> _tasks = new LinkedList<Task>(); // protected by lock(_tasks)
+
+        // The maximum concurrency level allowed by this scheduler.
+        private readonly int _maxDegreeOfParallelism;
+
+        // Indicates whether the scheduler is currently processing work items.
+        private int _delegatesQueuedOrRunning = 0;
+
+        // Creates a new instance with the specified degree of parallelism.
+        public LimitedConcurrencyLevelTaskScheduler(int maxDegreeOfParallelism)
+        {
+            if (maxDegreeOfParallelism < 1) throw new ArgumentOutOfRangeException("maxDegreeOfParallelism");
+            _maxDegreeOfParallelism = maxDegreeOfParallelism;
+        }
+
+        // Queues a task to the scheduler.
+        protected sealed override void QueueTask(Task task)
+        {
+            // Add the task to the list of tasks to be processed.  If there aren't enough
+            // delegates currently queued or running to process tasks, schedule another.
+            lock (_tasks)
+            {
+                _tasks.AddLast(task);
+                if (_delegatesQueuedOrRunning < _maxDegreeOfParallelism)
+                {
+                    ++_delegatesQueuedOrRunning;
+                    NotifyThreadPoolOfPendingWork();
+                }
+            }
+        }
+
+        // Inform the ThreadPool that there's work to be executed for this scheduler.
+        private void NotifyThreadPoolOfPendingWork()
+        {
+            ThreadPool.UnsafeQueueUserWorkItem(_ =>
+            {
+                // Note that the current thread is now processing work items.
+                // This is necessary to enable inlining of tasks into this thread.
+                _currentThreadIsProcessingItems = true;
+                try
+                {
+                    // Process all available items in the queue.
+                    while (true)
+                    {
+                        Task item;
+                        lock (_tasks)
+                        {
+                            // When there are no more items to be processed,
+                            // note that we're done processing, and get out.
+                            if (_tasks.Count == 0)
+                            {
+                                --_delegatesQueuedOrRunning;
+                                break;
+                            }
+
+                            // Get the next item from the queue
+                            item = _tasks.First.Value;
+                            _tasks.RemoveFirst();
+                        }
+
+                        // Execute the task we pulled out of the queue
+                        base.TryExecuteTask(item);
+                    }
+                }
+                // We're done processing items on the current thread
+                finally { _currentThreadIsProcessingItems = false; }
+            }, null);
+        }
+
+        // Attempts to execute the specified task on the current thread.
+        protected sealed override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
+        {
+            // If this thread isn't already processing a task, we don't support inlining
+            if (!_currentThreadIsProcessingItems) return false;
+
+            // If the task was previously queued, remove it from the queue
+            if (taskWasPreviouslyQueued)
+                // Try to run the task.
+                if (TryDequeue(task))
+                    return base.TryExecuteTask(task);
+                else
+                    return false;
+            else
+                return base.TryExecuteTask(task);
+        }
+
+        // Attempt to remove a previously scheduled task from the scheduler.
+        protected sealed override bool TryDequeue(Task task)
+        {
+            lock (_tasks) return _tasks.Remove(task);
+        }
+
+        // Gets the maximum concurrency level supported by this scheduler.
+        public sealed override int MaximumConcurrencyLevel { get { return _maxDegreeOfParallelism; } }
+
+        // Gets an enumerable of the tasks currently scheduled on this scheduler.
+        protected sealed override IEnumerable<Task> GetScheduledTasks()
+        {
+            bool lockTaken = false;
+            try
+            {
+                Monitor.TryEnter(_tasks, ref lockTaken);
+                if (lockTaken) return _tasks;
+                else throw new NotSupportedException();
+            }
+            finally
+            {
+                if (lockTaken) Monitor.Exit(_tasks);
+            }
         }
     }
 }
