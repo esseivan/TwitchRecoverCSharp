@@ -21,6 +21,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.WebSockets;
 using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -165,21 +166,22 @@ namespace TwitchRecoverCs.core.API
                 Uri dUrl = new Uri("https://raw.githubusercontent.com/TwitchRecover/TwitchRecover/main/domains.txt");
 
                 HttpWebRequest request = WebRequest.CreateHttp(dUrl);
-                request.Headers.Add("User-Agent", "Mozilla/5.0");
+                request.UserAgent = "Mozilla/5.0";
 
-                var httpResponse = (HttpWebResponse)request.GetResponse();
-                if (httpResponse.StatusCode == HttpStatusCode.OK)
+                using (HttpWebResponse httpResponse = (HttpWebResponse)request.GetResponse())
                 {
-
-                    using (Stream stream = httpResponse.GetResponseStream())
-                    using (StreamReader reader = new StreamReader(stream))
+                    if (httpResponse.StatusCode == HttpStatusCode.OK)
                     {
-                        string line = null;
-                        while ((line = reader.ReadLine()) != null)
+                        using (Stream stream = httpResponse.GetResponseStream())
+                        using (StreamReader reader = new StreamReader(stream))
                         {
-                            string response = line;
-                            domains.Add(response);
-                            added = true;
+                            string line = null;
+                            while ((line = reader.ReadLine()) != null)
+                            {
+                                string response = line;
+                                domains.Add(response);
+                                added = true;
+                            }
                         }
                     }
                 }
@@ -211,17 +213,19 @@ namespace TwitchRecoverCs.core.API
         {
             try
             {
-                Uri uObj = new Uri(url);
-                HttpWebRequest request = WebRequest.CreateHttp(uObj);
-                request.Headers.Add("User-Agent", "Mozilla/5.0");
+                HttpWebRequest request = WebRequest.CreateHttp(url);
+                request.UserAgent = "Mozilla/5.0";
 
-                if (((HttpWebResponse)request.GetResponse()).StatusCode == HttpStatusCode.OK)
+                using (HttpWebResponse httpResponse = (HttpWebResponse)request.GetResponse())
                 {
-                    return true;
+                    if (httpResponse.StatusCode == HttpStatusCode.OK)
+                    {
+                        return true;
+                    }
                 }
                 return false;
             }
-            catch (IOException)
+            catch (Exception)
             {
                 return false;
             }

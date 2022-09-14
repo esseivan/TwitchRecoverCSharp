@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -178,23 +179,14 @@ namespace TwitchRecoverCs.core.API
             {
                 using (WebClient wc = new WebClient())
                 {
-                    //wc.DownloadFile(url, downloadedFile);
-
+                    wc.DownloadFile(url, downloadedFile);
                 }
             }
-            catch (WebException ex)
-            {
-                if (ex.Response != null)
-                {
-                    var response = ex.Response;
-                    var dataStream = response.GetResponseStream();
-                    var reader = new StreamReader(dataStream);
-                    var details = reader.ReadToEnd();
-                }
-            }
+            catch (WebException) { }
 
-            if (downloadedFile == null)
-                return null;
+            if (downloadedFile == null || !File.Exists(downloadedFile))
+                return new Feeds(); ;
+
             return parseFeeds(File.ReadAllLines(downloadedFile).ToList());
         }
 
@@ -211,18 +203,37 @@ namespace TwitchRecoverCs.core.API
         {
             string[] results = new string[2];
             //Parse JSON:
-            JsonDocument jO = JsonDocument.Parse(response);
-            var tokenCat = jO.RootElement.GetProperty("data");
+            var jO = Newtonsoft.Json.Linq.JObject.Parse(response);
+            var tokenCat = jO["data"];
             if (isVOD)
-                tokenCat = tokenCat.GetProperty("videoPlaybackAccessToken");
+                tokenCat = tokenCat["videoPlaybackAccessToken"];
             else
-                tokenCat = tokenCat.GetProperty("streamPlaybackAccessToken");
+                tokenCat = tokenCat["streamPlaybackAccessToken"];
 
-            string token = tokenCat.GetProperty("value").GetString();
-            results[1] = tokenCat.GetProperty("signature").GetString();
+            string token = tokenCat["value"].ToString();
+            results[1] = tokenCat["signature"].ToString();
             results[0] = token.Replace("\\", ""); //Remove back slashes from token
 
             return results;
+
+
+            // Too slow version (or to be fixed)
+
+            //JsonDocument jO = JsonDocument.Parse(response);
+            //var tokenCat = jO.RootElement.GetProperty("data");
+            //if (isVOD)
+            //    tokenCat = tokenCat.GetProperty("videoPlaybackAccessToken");
+            //else
+            //    tokenCat = tokenCat.GetProperty("streamPlaybackAccessToken");
+
+            //string token = tokenCat.GetProperty("value").GetString();
+            //results[1] = tokenCat.GetProperty("signature").GetString();
+            //results[0] = token.Replace("\\", ""); //Remove back slashes from token
+
+            //var t = s.ElapsedMilliseconds;
+            //Console.WriteLine(t);
+
+            //return results;
         }
 
         /**
@@ -244,6 +255,7 @@ namespace TwitchRecoverCs.core.API
             {
                 json = "{\"operationName\": \"PlaybackAccessToken\",\"variables\": {\"isLive\": true,\"login\": \"" + id + "\",\"isVod\": false,\"vodID\": \"\",\"playerType\": \"channel_home_live\"},\"extensions\": {\"persistedQuery\": {\"version\": 1,\"sha256Hash\": \"0828119ded1c13477966434e15800ff57ddacf13ba1911c129dc2200705b0712\"}}}";
             }
+
             try
             {
                 HttpWebRequest httppost = WebRequest.CreateHttp("https://gql.twitch.tv/gql");
@@ -251,6 +263,7 @@ namespace TwitchRecoverCs.core.API
                 httppost.Method = "POST";
                 httppost.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
                 httppost.ContentType = "text/plain;charset=UTF-8";
+
 
                 using (Stream requestBody = httppost.GetRequestStream())
                 {
@@ -262,8 +275,7 @@ namespace TwitchRecoverCs.core.API
                 {
                     if (httpResponse.StatusCode == HttpStatusCode.OK /*200*/)
                     {
-                        using (Stream stream = httpResponse.GetResponseStream())
-                        using (StreamReader reader = new StreamReader(stream))
+                        using (StreamReader reader = new StreamReader(httpResponse.GetResponseStream()))
                         {
                             response = reader.ReadToEnd();
                         }

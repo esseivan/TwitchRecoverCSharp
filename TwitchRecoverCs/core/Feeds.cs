@@ -15,6 +15,7 @@
  *  Twitch Recover repository: https://github.com/TwitchRecover/TwitchRecover
  */
 
+using Newtonsoft.Json.Schema;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -146,6 +147,26 @@ namespace TwitchRecoverCs.core
         }
 
         /**
+         * An accessor that returns the feed url
+         * that corresponds to a particular
+         * given quality.
+         * @param q         Quality enum for which to ElementAt the corresponding feed url.
+         * @return String   String value representing the feed url that corresponds to
+         * the given quality or is null if the quality enum does not exist in the Feeds object.
+         */
+        public string getFeedQual(string q)
+        {
+            for (int i = 0; i < qualities.Count; i++)
+            {
+                if (qualities.ElementAt(i).text == q)
+                {
+                    return feeds.ElementAt(i);
+                }
+            }
+            return null;     //If this point it reaches it means the quality wasn't present in the qualities list.
+        }
+
+        /**
          * An accessor for the qualiies
          * List which returns the Quality
          * enum located at a particular enum.
@@ -194,6 +215,11 @@ namespace TwitchRecoverCs.core
         public List<Quality> getQualities()
         {
             return qualities;
+        }
+
+        public int GetCount()
+        {
+            return Math.Max(feeds.Count, qualities.Count);
         }
     }
 }

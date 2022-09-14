@@ -15,15 +15,15 @@
  *  Twitch Recover repository: https://github.com/TwitchRecover/TwitchRecover
  */
 
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using TwitchRecoverCs.core.Downloader;
 using TwitchRecoverCs.core.Enums;
@@ -48,8 +48,12 @@ namespace TwitchRecoverCs.core.API
         public static Feeds getVODFeeds(long VODID)
         {
             FileDestroyer downloadedFile = FileHandler.createTempFile("TwitchRecover-Playlist-", ".m3u8");
+
             string[] auth = getVODToken(VODID);  //0: Token; 1: Signature.
-            return API.getPlaylist("https://usher.ttvnw.net/vod/" + VODID + ".m3u8?sig=" + auth[1] + "&token=" + auth[0] + "&allow_source=true&player=twitchweb&allow_spectre=true&allow_audio_only=true", downloadedFile);
+
+            var res = API.getPlaylist(string.Format("https://usher.ttvnw.net/vod/{0}.m3u8?sig={1}&token={2}&allow_source=true&player=twitchweb&allow_spectre=true&allow_audio_only=true", VODID, auth[1], auth[0]), downloadedFile);
+
+            return res;
         }
 
         /**
@@ -67,9 +71,9 @@ namespace TwitchRecoverCs.core.API
             try
             {
                 HttpWebRequest httpget = WebRequest.CreateHttp(string.Format("https://api.twitch.tv/kraken/videos/{0}", VODID));
-                httpget.Headers.Add("User-Agent", "Mozilla/5.0");
-                httpget.Headers.Add("Accept", "application/vnd.twitchtv.v5+json");
                 httpget.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+                httpget.UserAgent = "Mozilla/5.0";
+                httpget.Accept = "application/vnd.twitchtv.v5+json";
 
                 using (HttpWebResponse httpResponse = (HttpWebResponse)httpget.GetResponse())
                 {
@@ -86,13 +90,13 @@ namespace TwitchRecoverCs.core.API
             catch (Exception) { }
 
             //Parse the JSON response:
-            JsonDocument jO = JsonDocument.Parse(response);
-            string baseURL = Compute.singleRegex("https:\\/\\/[a-z0-9]*.cloudfront.net\\/([a-z0-9_]*)\\/storyboards\\/[0-9]*-info.json", jO.RootElement.GetProperty("seek_previews_url").GetString());
+            JObject jO = JObject.Parse(response);
+            string baseURL = Compute.singleRegex("https:\\/\\/[a-z0-9]*.cloudfront.net\\/([a-z0-9_]*)\\/storyboards\\/[0-9]*-info.json", jO["seek_previews_url"].ToString());
 
             string token = getVODToken(VODID)[0];
 
-            JsonDocument jO2 = JsonDocument.Parse(token);
-            var restricted = jO2.RootElement.GetProperty("chansub").GetProperty("restricted_bitrates").EnumerateArray();
+            JObject jO2 = JObject.Parse(token);
+            var restricted = jO2["chansub"]["restricted_bitrates"].ToArray();
 
             if (highlight)
             {

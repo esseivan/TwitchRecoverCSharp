@@ -69,24 +69,49 @@ namespace TwitchRecoverCs.core
          * @param fe    FileExtension enum representing the desired output file extension.
          * @param feed  string value representing the desired feed to download.
          */
-        public void downloadVOD(FileExtension fe, string feed)
+        public async void downloadVOD(FileExtension fe, string feed)
         {
             computeFN();
-            if (vodInfo == null)
-            {
-                getVODFeeds();
-            }
-            else
-            {
-                retrieveVOD(false);
-                retrieveVODFeeds();
-            }
+            //if (vodInfo == null)
+            //{
+            //    getVODFeeds();
+            //}
+            //else
+            //{
+            //    retrieveVOD(false);
+            //    retrieveVODFeeds();
+            //}
             fFP = fp + fn + fe.fileExtension;
             try
             {
-                Download.m3u8Download(feed, fFP);
+                await Download.m3u8Download(feed, fFP);
             }
-            catch (IOException) { }
+            catch (IOException ex)
+            {
+                Console.WriteLine("FATAL : " + ex.ToString());
+            }
+        }
+
+        /**
+         * This method processes the downloading of a
+         * VOD.
+         * @param fe    FileExtension enum representing the desired output file extension.
+         * @param feed  string value representing the desired feed to download.
+         */
+        public async Task<string> downloadVOD(string feed)
+        {
+            fFP = fp;
+            string result = null;
+            try
+            {
+                result = await Download.m3u8Download(feed, fFP);
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine("FATAL : " + ex.ToString());
+            }
+
+            return result;
         }
 
         /**
@@ -296,7 +321,7 @@ namespace TwitchRecoverCs.core
          */
         public void setFP(string fp)
         {
-            this.fp = FileIO.adjustFP(fp);
+            this.fp = fp;//FileIO.adjustFP(fp);
         }
 
         public void retrieveID(string url)
@@ -312,11 +337,11 @@ namespace TwitchRecoverCs.core
         {
             if (vodInfo == null)
             {
-                fn = FileIO.computeFN(ContentType.values()[ContentTypeTypes.VOD], VODID.ToString());
+                fn = FileIO.computeFN("VOD", VODID.ToString());
             }
             else
             {
-                fn = FileIO.computeFN(ContentType.values()[ContentTypeTypes.VOD], vodInfo[1]);
+                fn = FileIO.computeFN("VOD", vodInfo[1]);
             }
         }
     }

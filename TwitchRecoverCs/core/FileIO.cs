@@ -109,9 +109,9 @@ namespace TwitchRecoverCs.core
          * @param id        string value representing the ID (clip slug, VOD ID, etc.) of the content.
          * @return string   string value representing the compute file name (excluding file extension).
          */
-        public static string computeFN(ContentType ct, string id)
+        public static string computeFN(string ct, string id)
         {
-            return "TwitchRecover-" + ct.ToString() + "-" + id;
+            return "TwitchRecover-" + ct + "-" + id;
         }
 
         /**

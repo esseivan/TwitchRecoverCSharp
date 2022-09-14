@@ -165,5 +165,10 @@ namespace TwitchRecoverCs.core.Enums
             }
             return null;
         }
+
+        public override string ToString()
+        {
+            return text;
+        }
     }
 }

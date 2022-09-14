@@ -65,7 +65,7 @@ namespace TwitchRecoverCs.core.Downloader
                     name,
                     Path.GetFileNameWithoutExtension(Path.GetRandomFileName()),
                     extension));
-            //File.Create(tempPath).Close();
+            File.Create(tempPath).Close();
             return new FileDestroyer(tempPath);
         }
 
@@ -76,7 +76,7 @@ namespace TwitchRecoverCs.core.Downloader
          * @param segmentMap    Navigable map holding the index and file objects of all the segment files.
          * @param fp            Final file path of the file.
          */
-        internal static string mergeFile(SortedDictionary<int, string> segmentMap, string fp)
+        internal static string mergeFile(SortedDictionary<int, FileDestroyer> segmentMap, string fp)
         {
             using (var outputStream = File.Create(fp))
             {

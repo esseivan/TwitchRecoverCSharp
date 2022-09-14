@@ -19,14 +19,17 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Security.Policy;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchRecoverCs.core.Downloader;
+using static System.Net.WebRequestMethods;
 
 namespace TwitchRecoverCs.core.Downloader
 {
@@ -36,6 +39,12 @@ namespace TwitchRecoverCs.core.Downloader
      */
     public class Download
     {
+        public static event EventHandler<DownloadProgressChangedEventArgs> ProgressChanged;
+        public static event EventHandler<int> DownloadStarted;
+        public static event EventHandler<int> ChunkDownloaded;
+        public static int P_MAX_COUNT = 0;
+        public static int P_COUNT = 0;
+
         private const int MAX_TRIES = 5;
         /**
          * This method downloads a file from a
@@ -56,12 +65,55 @@ namespace TwitchRecoverCs.core.Downloader
             return fp + extension;
         }
 
-        public static string m3u8Download(string url, string fp)
+        private static SortedDictionary<int, FileDestroyer> segmentMap = null;
+        public async static Task<string> m3u8Download(string url, string fp)
         {
             FileHandler.createTempFolder();
             List<string> chunks = M3U8Handler.getChunks(url);
-            SortedDictionary<int, string> segmentMap = TSDownload(chunks);
-            return FileHandler.mergeFile(segmentMap, fp);
+            DownloadStarted?.Invoke(url, chunks.Count);
+            segmentMap = await TSDownload(chunks);
+            string result = FileHandler.mergeFile(segmentMap, fp);
+            return result;
+        }
+
+        public static string m3u8_retryMerge(string fp)
+        {
+            try
+            {
+                string result = FileHandler.mergeFile(segmentMap, fp);
+                return result;
+            }
+            catch (IOException) { }
+            return string.Empty;
+        }
+
+        /**
+         * This method creates a temporary download
+         * from a URL.
+         * @param url       URL of the file to be downloaded.
+         * @return File     File object of the file that will be downloaded and is returned.
+         * @throws IOException
+         */
+        public static async Task<FileDestroyer> tempDownloadAsync(string url)
+        {
+            string prefix = Path.GetFileNameWithoutExtension(url);
+
+            if (prefix.Length < 2)
+            {     //This has to be implemented since the prefix value of the createTempFile method
+                prefix = "00" + prefix;     //which we use to create a temp file, has to be a minimum of 3 characters long.
+            }
+            else if (prefix.Length < 3)
+            {
+                prefix = "0" + prefix;
+            }
+
+            FileDestroyer downloadedFile = FileHandler.createTempFile(prefix + "-", Path.GetExtension(url));    //Creates the temp file.
+            using (WebClient wc = new WebClient())
+            {
+                await wc.DownloadFileTaskAsync(new Uri(url), downloadedFile);
+            }
+
+            return downloadedFile;
         }
 
         /**
@@ -84,10 +136,10 @@ namespace TwitchRecoverCs.core.Downloader
                 prefix = "0" + prefix;
             }
 
-            string downloadedFile = FileHandler.createTempFile(prefix + "-", "." + Path.GetExtension(url));    //Creates the temp file.
+            string downloadedFile = FileHandler.createTempFile(prefix + "-", Path.GetExtension(url));    //Creates the temp file.
             using (WebClient wc = new WebClient())
             {
-                wc.DownloadFile(url, downloadedFile);
+                wc.DownloadFile(new Uri(url), downloadedFile);
             }
 
             return downloadedFile;
@@ -100,11 +152,11 @@ namespace TwitchRecoverCs.core.Downloader
          * @param links                         Arraylist holding all of the links to download.
          * @return NavigableMap<Integer, File>  Navigable map holdding the index and file objects of each TS segment.
          */
-        private static SortedDictionary<int, string> TSDownload(List<string> links)
+        private async static Task<SortedDictionary<int, FileDestroyer>> TSDownload(List<string> links)
         {
-            SortedDictionary<int, string> segmentMap = new SortedDictionary<int, string>();
+            SortedDictionary<int, FileDestroyer> segmentMap = new SortedDictionary<int, FileDestroyer>();
             ConcurrentQueue<string> downloadQueue = new ConcurrentQueue<string>(links);
-
+            ConcurrentQueue<FileDestroyer> downloadedQueue = new ConcurrentQueue<FileDestroyer>();
 
             int index = 0;
             while (!downloadQueue.IsEmpty)
@@ -113,7 +165,8 @@ namespace TwitchRecoverCs.core.Downloader
 
                 int finalIndex = index;
 
-                Task.Factory.StartNew(() =>
+                // Downloader task
+                await Task.Factory.StartNew(async () =>
                 {
                     int currentTries = 1;
                     if (downloadQueue.TryDequeue(out string item))
@@ -124,14 +177,29 @@ namespace TwitchRecoverCs.core.Downloader
                             string threadItem = item;
                             try
                             {
-                                string tempTS = tempDownload(threadItem);
+                                FileDestroyer tempTS = await tempDownloadAsync(threadItem);
                                 segmentMap[threadIndex] = tempTS;
-                                break;
+                                ChunkDownloaded?.Invoke(tempTS, threadIndex);
+                                // This thread is done
+                                downloadedQueue.Enqueue(tempTS);
+                                return; // WARN : return here
                             }
-                            catch (Exception) { }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(string.Format("WARNING : Unable to download {0}. Reason is :", item));
+                                Console.WriteLine(ex.ToString());
+                            }
                         }
                     }
+                    // IF an error occured, input a invalid one
+                    downloadedQueue.Enqueue(new FileDestroyer(item));
                 });
+            }
+
+            while (downloadedQueue.Count != links.Count)
+            {
+                Console.WriteLine(string.Format("Waiting for download... Currently at {0}/{1}", downloadedQueue.Count, links.Count));
+                await Task.Delay(100);
             }
 
             return segmentMap;
