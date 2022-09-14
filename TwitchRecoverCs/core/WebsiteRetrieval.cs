@@ -89,7 +89,7 @@ namespace TwitchRecoverCs.core
             {
                 return 1;   //Twitch Tracker URL.
             }
-            else if (url.Contains("streamscharts.com/twitch/channels/") && url.Contains("/streams/"))
+            else if (url.Contains("streamscharts.com/channels/") && url.Contains("/streams/"))
             {
                 return 2;   //Streams Charts URL.
             }
@@ -107,7 +107,7 @@ namespace TwitchRecoverCs.core
             string json = "";
             Uri jsonFetch = new Uri(url);
             HttpWebRequest httpcon = WebRequest.CreateHttp(jsonFetch);
-            httpcon.Headers.Add("User-Agent", "Mozilla/5.0");
+            httpcon.UserAgent = "Mozilla/5.0";
 
             string readLine = null;
             HttpWebResponse httpResponse = (HttpWebResponse)httpcon.GetResponse();
@@ -212,7 +212,7 @@ namespace TwitchRecoverCs.core
             string userID;
             double duration = 0.0;
             //Retrieve initial values:
-            string pattern = "streamscharts\\.com\\/twitch\\/channels\\/([a-zA-Z0-9_-]*)\\/streams\\/(\\d*)";
+            string pattern = "streamscharts\\.com\\/channels\\/([a-zA-Z0-9_-]*)\\/streams\\/(\\d*)";
             Regex r = new Regex(pattern);
             Match m = r.Match(url);
             if (m.Success)
@@ -220,6 +220,14 @@ namespace TwitchRecoverCs.core
                 results[0] = m.Groups[1].ToString();
                 results[1] = m.Groups[2].ToString();
             }
+
+            // This is no longer working on the new api version "https://api.twitch.tv/helix/users"
+            // OAuth must be set, as well as an app to be registered
+            // https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/#client-credentials-grant-flow
+            // https://dev.twitch.tv/docs/authentication/register-app
+            // https://dev.twitch.tv/docs/authentication#app-access-tokens
+            // https://dev.twitch.tv/docs/api/migration
+
 
             //Retrieve user ID:
             string idJSON = getJSON("https://api.twitch.tv/v5/users/?login=" + results[0] + "&client_id=ohroxg880bxrq1izlrinohrz3k4vy6");

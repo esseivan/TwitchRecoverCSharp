@@ -188,7 +188,7 @@ public class WebsiteRetrieval {
         }
 
         //Retrieve user ID:
-        String idJSON = getJSON("https://api.twitch.tv/v5/users/?login=" + results[0] + "&client_id=ohroxg880bxrq1izlrinohrz3k4vy6");
+        String idJSON = getJSON("https://api.twitch.tv/helix/users?login=" + results[0] + "&client_id=ohroxg880bxrq1izlrinohrz3k4vy6");
         JSONObject joID = new JSONObject(idJSON);
         JSONArray users = joID.getJSONArray("users");
         JSONObject user = users.getJSONObject(0);

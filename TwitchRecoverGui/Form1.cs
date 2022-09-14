@@ -17,6 +17,7 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Diagnostics.Tracing;
 using System.Security;
 using System.IO;
+using System.Reflection;
 
 namespace TwitchRecoverGui
 {
@@ -37,16 +38,6 @@ namespace TwitchRecoverGui
 
             DownloadVOD.DownloadStarted += DownloadVOD_DownloadStarted;
             DownloadVOD.ChunkDownloaded += DownloadVOD_ChunkDownloaded;
-        }
-
-        private Feeds GetFeeds()
-        {
-            Console.WriteLine("\nVOD URL retrieval:");
-            string url = textBox1.Text;
-            vod = new VOD(false);
-            vod.retrieveID(url);
-            feeds = vod.getVODFeeds();
-            return feeds;
         }
 
         private async void Download(int index, string filePath)
@@ -86,7 +77,8 @@ namespace TwitchRecoverGui
                 {
                     label3.Text = string.Format("Estimation : {0} MB", approxTotalSize_MB);
                 });
-            } else if (e > 1)
+            }
+            else if (e > 1)
             {
                 int approxCurrentSize_MB = (int)(chunkCounter * approxChunkSize_MB);
                 statusStrip1.Invoke((MethodInvoker)delegate
@@ -109,22 +101,68 @@ namespace TwitchRecoverGui
             progressBar1.Value = e.ProgressPercentage;
         }
 
+        private bool GetActiveVODFeeds(string url)
+        {
+            Console.WriteLine("\nVOD URL retrieval:");
+            vod = new VOD(false);
+            vod.retrieveID(url);
+            feeds = vod.getVODFeeds();
+
+            if (feeds == null || feeds.GetCount() == 0)
+                return false;
+            return true;
+        }
+
+        private bool GetDeletedVODFeeds(string url)
+        {
+            Console.WriteLine("\nVOD URL recovery:");
+            vod = new VOD(true);
+
+            vod.retrieveVODURL(url);
+            vod.retrieveVOD(false);
+            feeds = vod.retrieveVODFeeds();
+
+            if (feeds == null || feeds.GetCount() == 0)
+                return false;
+            return true;
+        }
+
+        private void GetVOD(string url)
+        {
+            bool success = false;
+
+            try
+            {
+                success = GetActiveVODFeeds(url);
+            }
+            catch (Exception) { }
+            if (success) return;
+
+            try
+            {
+                // Need OAuth
+                //success = GetDeletedVODFeeds(url);
+            }
+            catch (Exception) { }
+            if (success) return;
+
+
+        }
+
         private void button1_Click(object sender, EventArgs e)
         {
             Stopwatch s = new Stopwatch();
             s.Start();
-
             Cursor = Cursors.WaitCursor;
 
-            GetFeeds();
-            if (feeds == null || feeds.GetCount() == 0)
-                return;
-
             comboBox1.Items.Clear();
-            comboBox1.Items.AddRange(feeds.getQualities().ToArray());
+            GetVOD(textBox1.Text);
+            if (feeds != null && feeds.GetCount() != 0)
+                comboBox1.Items.AddRange(feeds.getQualities().ToArray());
+
+
 
             Cursor = Cursors.Default;
-
             Console.WriteLine(s.ElapsedMilliseconds);
         }
 
@@ -150,6 +188,26 @@ namespace TwitchRecoverGui
                 MessageBox.Show("Success");
                 Process.Start(result);
             }
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboBox1.SelectedIndex == -1)
+                textBox2.Text = string.Empty;
+            else
+                textBox2.Text = feeds.getFeed(comboBox1.SelectedIndex);
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(textBox2.Text))
+                Process.Start("vlc", textBox2.Text);
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Ask confirmation if download in progress
+            // and Cancel all tasks if asked
         }
     }
 }
