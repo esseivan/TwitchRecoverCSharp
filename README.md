@@ -1,6 +1,8 @@
 
 # Twitch Recover
 
+I edited the original repository https://github.com/TwitchRecover/TwitchRecover/ to convert to C#. 
+
 ### Twitch Recover is a free tool that allows you to view, recover and download all types of Twitch videos (VODs, clips, streams and highlights).
   
 ### There are two current versions available, the alpha of the 2.0 version which has 17 different features and the 1.2 version which is the last current stable version.  
