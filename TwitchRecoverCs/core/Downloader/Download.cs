@@ -73,8 +73,6 @@ namespace TwitchRecoverCs.core.Downloader
             List<string> chunks = M3U8Handler.getChunks(url);
             DownloadStarted?.Invoke(url, chunks.Count);
             segmentMap = await TSDownload(chunks, token);
-            if (segmentMap == null)
-                return null;
             string result = FileHandler.mergeFile(segmentMap, fp);
             return result;
         }
@@ -182,7 +180,7 @@ namespace TwitchRecoverCs.core.Downloader
                 Console.WriteLine("{0} thread(s) available", maxThread.CurrentCount);
                 await maxThread.WaitAsync();    // Wait for a thread to be available
                 if (token.IsCancellationRequested)
-                    return null;
+                    return segmentMap; // Still output the current segment map
 
                 // Downloader task
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
@@ -228,7 +226,7 @@ namespace TwitchRecoverCs.core.Downloader
                 Console.WriteLine(string.Format("Waiting for download... Currently at {0}/{1}", downloadedQueue.Count, links.Count));
                 await Task.Delay(100);
                 if (token.IsCancellationRequested)
-                    return null;
+                    return segmentMap; // Still output the current segment map
             }
 
             Console.WriteLine("\n\nSuccessful completion.");

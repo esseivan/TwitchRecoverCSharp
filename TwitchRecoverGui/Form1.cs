@@ -32,6 +32,8 @@ namespace TwitchRecoverGui
         private float approxChunkSize_MB = 0;
         private int approxTotalSize_MB = 0;
 
+        private bool ContinueMerge = false;
+
         private CancellationTokenSource cts;
 
         public Form1()
@@ -51,13 +53,20 @@ namespace TwitchRecoverGui
                     + "\nFile path: "
             );
 
-            if(vod == null)
+            if (vod == null)
                 vod = new VOD(false);
 
             vod.setFP(filePath);
             Console.WriteLine("\nDownloading...");
             cts = new CancellationTokenSource();
             string result = await vod.downloadVOD(feed, cts.Token);
+            if (cts.IsCancellationRequested)
+            {
+                if (!ContinueMerge)
+                    return;
+                // Continue the merge although it was cancelled
+                ContinueMerge = false;
+            }
 
             if (string.IsNullOrEmpty(result))
             {
@@ -234,6 +243,109 @@ namespace TwitchRecoverGui
                 return;
             cts.Cancel();
             progressBar1.Value = 0;
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            // Cancel the task and set the flag to still merge
+            if (cts == null)
+                return;
+            if (cts.IsCancellationRequested)
+                return;
+
+            ContinueMerge = true;
+            cts.Cancel();
+            progressBar1.Value = 0;
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(textBox2.Text))
+                return;
+
+            List<string> chunks = M3U8Handler.getChunks(textBox2.Text);
+            // Each chunk is ~ 10 second
+            TimeSpan duration = TimeSpan.FromSeconds(chunks.Count * 10);
+            label9.Text = duration.ToString("hh':'mm':'ss");
+            dateTimePicker3.Value = new DateTime(2000, 01, 01) + duration;
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            label9.ResetText();
+        }
+
+        private bool ScriptEdit = false;
+
+        private void textBox3_TextChanged(object sender, EventArgs e)
+        {
+            if (ScriptEdit) return;
+
+            ScriptEdit = true;
+            if (int.TryParse(textBox3.Text, out int sc) && sc >= 0)
+            {
+                if(sc == 0)
+                {
+                    sc = 1;
+                    textBox3.Text = 1.ToString();
+                }
+                dateTimePicker1.Value = new DateTime(2000, 01, 01) + TimeSpan.FromSeconds(10 * (sc - 1));
+            }
+            ScriptEdit = false;
+        }
+
+        private void textBox4_TextChanged(object sender, EventArgs e)
+        {
+            if (ScriptEdit) return;
+
+            ScriptEdit = true;
+            if (int.TryParse(textBox4.Text, out int ec) && ec > 0)
+            {
+                dateTimePicker2.Value = new DateTime(2000, 01, 01) + TimeSpan.FromSeconds(10 * ec);
+                dateTimePicker3.Value = new DateTime(2000, 01, 01) + (dateTimePicker2.Value - dateTimePicker1.Value);
+            }
+            ScriptEdit = false;
+        }
+
+        private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
+        {
+            if (ScriptEdit) return;
+
+            ScriptEdit = true;
+            DateTime dt = dateTimePicker1.Value;
+            TimeSpan st = new TimeSpan(dt.Hour, dt.Minute, dt.Second);
+            int chunkCount = (int)Math.Ceiling(st.TotalSeconds / 10);
+            textBox3.Text = chunkCount.ToString();
+            ScriptEdit = false;
+        }
+
+        private void dateTimePicker2_ValueChanged(object sender, EventArgs e)
+        {
+            if (ScriptEdit) return;
+
+            ScriptEdit = true;
+            DateTime dt = dateTimePicker2.Value;
+            TimeSpan et = new TimeSpan(dt.Hour, dt.Minute, dt.Second);
+            int chunkCount = (int)Math.Ceiling(et.TotalSeconds / 10);
+            textBox4.Text = chunkCount.ToString();
+            dateTimePicker3.Value = new DateTime(2000, 01, 01) + (dateTimePicker2.Value - dateTimePicker1.Value);
+            ScriptEdit = false;
+        }
+
+        private void dateTimePicker3_ValueChanged(object sender, EventArgs e)
+        {
+            if (ScriptEdit) return;
+
+            ScriptEdit = true;
+            DateTime dt = dateTimePicker3.Value;
+            TimeSpan duration = new TimeSpan(dt.Hour, dt.Minute, dt.Second);
+            dateTimePicker2.Value = dateTimePicker1.Value + duration;
+
+            dt = dateTimePicker2.Value;
+            TimeSpan et = new TimeSpan(dt.Hour, dt.Minute, dt.Second);
+            int chunkCount = (int)Math.Ceiling(et.TotalSeconds / 10);
+            textBox4.Text = chunkCount.ToString();
+            ScriptEdit = false;
         }
     }
 }
