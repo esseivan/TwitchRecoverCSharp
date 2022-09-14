@@ -76,6 +76,9 @@ namespace TwitchRecoverCs.core.Downloader
          */
         internal static string mergeFile(SortedDictionary<int, FileDestroyer> segmentMap, string fp)
         {
+            if (segmentMap == null)
+                return null;
+
             using (var outputStream = File.Create(fp))
             {
                 foreach (var inputFilePath in segmentMap)

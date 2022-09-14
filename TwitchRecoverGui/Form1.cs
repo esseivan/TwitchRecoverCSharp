@@ -44,17 +44,20 @@ namespace TwitchRecoverGui
             DownloadVOD.ChunkDownloaded += DownloadVOD_ChunkDownloaded;
         }
 
-        private async void Download(int index, string filePath)
+        private async void Download(string feed, string filePath)
         {
             Console.WriteLine(
                       "\nPlease enter the FILE PATH of where you want the VOD saved:"
                     + "\nFile path: "
             );
 
+            if(vod == null)
+                vod = new VOD(false);
+
             vod.setFP(filePath);
             Console.WriteLine("\nDownloading...");
             cts = new CancellationTokenSource();
-            string result = await vod.downloadVOD(feeds.getFeed(index), cts.Token);
+            string result = await vod.downloadVOD(feed, cts.Token);
 
             if (string.IsNullOrEmpty(result))
             {
@@ -72,7 +75,7 @@ namespace TwitchRecoverGui
         private void DownloadVOD_ChunkDownloaded(object sender, int e)
         {
             chunkCounter++;
-            toolStripStatusLabel1.Text = string.Format("{0}/{1}", chunkCounter, chunkMax);
+            toolStripStatusLabel1.Text = string.Format("{0}/{1} chunks downloaded", chunkCounter, chunkMax);
             progressBar1.Invoke((MethodInvoker)delegate
             {
                 progressBar1.Value = 100 * chunkCounter / chunkMax;
@@ -178,19 +181,22 @@ namespace TwitchRecoverGui
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if (feeds == null || feeds.GetCount() == 0 || comboBox1.SelectedIndex == -1)
+            if (string.IsNullOrEmpty(textBox2.Text))
                 return;
 
             // Get save path
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                Download(comboBox1.SelectedIndex, saveFileDialog1.FileName);
+                Download(textBox2.Text, saveFileDialog1.FileName);
             }
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
             string result = DownloadVOD.m3u8_retryMerge(vod.getFFP());
+            if (result == null)
+                return;
+
             if (string.IsNullOrEmpty(result))
                 MessageBox.Show("Failed");
             else

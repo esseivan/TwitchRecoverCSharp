@@ -169,34 +169,36 @@ namespace TwitchRecoverCs.core.Downloader
 
             // https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskscheduler?redirectedfrom=MSDN&view=net-6.0
 
-            // Create a scheduler that uses 10 threads.
-            LimitedConcurrencyLevelTaskScheduler lcts = new LimitedConcurrencyLevelTaskScheduler(2);
-            List<Task> tasks = new List<Task>();
-            // Create a TaskFactory and pass it our custom scheduler.
-            TaskFactory factory = new TaskFactory(lcts);
-            // Use our factory to run a set of tasks.
+            // Limit to x threads simultaneously
+            SemaphoreSlim maxThread = new SemaphoreSlim(8);
 
             int index = 0;
             while (!downloadQueue.IsEmpty)
             {
                 index++;
-
                 int finalIndex = index;
 
+                // Wait for room
+                Console.WriteLine("{0} thread(s) available", maxThread.CurrentCount);
+                await maxThread.WaitAsync();    // Wait for a thread to be available
+                if (token.IsCancellationRequested)
+                    return null;
+
                 // Downloader task
-                await await factory.StartNew(async () =>
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                (await Task.Factory.StartNew(async () =>
                 {
                     int currentTries = 1;
-                    if (downloadQueue.TryDequeue(out string item))
+                    if (downloadQueue.TryDequeue(out string item)) // Get an url
                     {
+                        int threadIndex = finalIndex;
+                        string threadItem = item;
                         while (currentTries <= MAX_TRIES)
                         {
-                            int threadIndex = finalIndex;
-                            string threadItem = item;
                             try
                             {
                                 FileDestroyer tempTS = await tempDownloadAsync(threadItem, token);
-                                segmentMap[threadIndex] = tempTS;
+                                segmentMap[threadIndex] = tempTS;   // save id and filepath
                                 ChunkDownloaded?.Invoke(tempTS, threadIndex);
                                 // This thread is done
                                 downloadedQueue.Enqueue(tempTS);
@@ -215,13 +217,8 @@ namespace TwitchRecoverCs.core.Downloader
                     }
                     // If an error occured, input a invalid one
                     downloadedQueue.Enqueue(new FileDestroyer(item));
-                }, token);
-                //tasks.Add(t);
-
-                if (token.IsCancellationRequested)
-                {
-                    return null;
-                }
+                }, token)).ContinueWith((task) => maxThread.Release());
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
 
             Console.WriteLine("All tasks created !!!");
@@ -234,7 +231,6 @@ namespace TwitchRecoverCs.core.Downloader
                     return null;
             }
 
-            Task.WaitAll(tasks.ToArray(), 100);
             Console.WriteLine("\n\nSuccessful completion.");
 
             return segmentMap;

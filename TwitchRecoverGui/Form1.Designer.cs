@@ -84,7 +84,7 @@
             this.comboBox1.FormattingEnabled = true;
             this.comboBox1.Location = new System.Drawing.Point(12, 107);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(192, 215);
+            this.comboBox1.Size = new System.Drawing.Size(192, 189);
             this.comboBox1.TabIndex = 3;
             this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
@@ -99,7 +99,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(12, 328);
+            this.button2.Location = new System.Drawing.Point(12, 338);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 5;
@@ -109,7 +109,7 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(12, 380);
+            this.progressBar1.Location = new System.Drawing.Point(12, 373);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(776, 23);
             this.progressBar1.TabIndex = 6;
@@ -128,12 +128,14 @@
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(0, 17);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(12, 17);
+            this.toolStripStatusLabel1.Text = "-";
             // 
             // toolStripStatusLabel2
             // 
             this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
-            this.toolStripStatusLabel2.Size = new System.Drawing.Size(0, 17);
+            this.toolStripStatusLabel2.Size = new System.Drawing.Size(12, 17);
+            this.toolStripStatusLabel2.Text = "-";
             // 
             // saveFileDialog1
             // 
@@ -142,7 +144,7 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(713, 351);
+            this.button3.Location = new System.Drawing.Point(713, 344);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(75, 23);
             this.button3.TabIndex = 8;
@@ -153,32 +155,33 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 361);
+            this.label3.Location = new System.Drawing.Point(12, 407);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(0, 13);
+            this.label3.Size = new System.Drawing.Size(10, 13);
             this.label3.TabIndex = 9;
+            this.label3.Text = "-";
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(210, 328);
+            this.button4.Location = new System.Drawing.Point(129, 338);
             this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(75, 23);
+            this.button4.Size = new System.Drawing.Size(134, 23);
             this.button4.TabIndex = 10;
-            this.button4.Text = "Open in VLC";
+            this.button4.Text = "Open live feed in VLC";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(210, 293);
+            this.textBox2.Location = new System.Drawing.Point(12, 312);
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(222, 20);
+            this.textBox2.Size = new System.Drawing.Size(454, 20);
             this.textBox2.TabIndex = 11;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(210, 277);
+            this.label4.Location = new System.Drawing.Point(9, 296);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(73, 13);
             this.label4.TabIndex = 12;
@@ -196,7 +199,7 @@
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(663, 409);
+            this.button5.Location = new System.Drawing.Point(663, 402);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(125, 23);
             this.button5.TabIndex = 14;
