@@ -115,10 +115,10 @@ namespace TwitchRecoverCs.core.Downloader
             using (WebClient wc = new WebClient())
             {
                 var downloadTask = wc.DownloadFileTaskAsync(new Uri(url), downloadedFile);
-
                 using (token.Register(() => wc.CancelAsync()))
                 {
                     await downloadTask;
+                    token.ThrowIfCancellationRequested();
                 }
             }
 
@@ -170,7 +170,7 @@ namespace TwitchRecoverCs.core.Downloader
             // https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskscheduler?redirectedfrom=MSDN&view=net-6.0
 
             // Create a scheduler that uses 10 threads.
-            LimitedConcurrencyLevelTaskScheduler lcts = new LimitedConcurrencyLevelTaskScheduler(10);
+            LimitedConcurrencyLevelTaskScheduler lcts = new LimitedConcurrencyLevelTaskScheduler(2);
             List<Task> tasks = new List<Task>();
             // Create a TaskFactory and pass it our custom scheduler.
             TaskFactory factory = new TaskFactory(lcts);
@@ -184,7 +184,7 @@ namespace TwitchRecoverCs.core.Downloader
                 int finalIndex = index;
 
                 // Downloader task
-                Task t = await Task.Factory.StartNew(async () =>
+                await await factory.StartNew(async () =>
                 {
                     int currentTries = 1;
                     if (downloadQueue.TryDequeue(out string item))
@@ -204,18 +204,37 @@ namespace TwitchRecoverCs.core.Downloader
                             }
                             catch (Exception ex)
                             {
+                                if (token.IsCancellationRequested)
+                                    return;
                                 Console.WriteLine(string.Format("WARNING : Unable to download {0}. Reason is :", item));
                                 Console.WriteLine(ex.ToString());
                             }
+                            if (token.IsCancellationRequested)
+                                return;
                         }
                     }
                     // If an error occured, input a invalid one
                     downloadedQueue.Enqueue(new FileDestroyer(item));
                 }, token);
-                tasks.Add(t);
+                //tasks.Add(t);
+
+                if (token.IsCancellationRequested)
+                {
+                    return null;
+                }
             }
 
-            Task.WaitAll(tasks.ToArray());
+            Console.WriteLine("All tasks created !!!");
+
+            while (downloadedQueue.Count != links.Count)
+            {
+                Console.WriteLine(string.Format("Waiting for download... Currently at {0}/{1}", downloadedQueue.Count, links.Count));
+                await Task.Delay(100);
+                if (token.IsCancellationRequested)
+                    return null;
+            }
+
+            Task.WaitAll(tasks.ToArray(), 100);
             Console.WriteLine("\n\nSuccessful completion.");
 
             return segmentMap;

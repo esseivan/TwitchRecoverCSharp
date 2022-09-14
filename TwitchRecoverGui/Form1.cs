@@ -227,7 +227,7 @@ namespace TwitchRecoverGui
             if (cts.IsCancellationRequested)
                 return;
             cts.Cancel();
-            cts.Dispose();
+            progressBar1.Value = 0;
         }
     }
 }

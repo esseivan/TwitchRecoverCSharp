@@ -58,9 +58,7 @@ namespace TwitchRecoverCs.core.Downloader
          */
         internal static FileDestroyer createTempFile(string name, string extension)
         {
-            if (TEMP_FOLDER_PATH == null) createTempFolder();
-
-            string tempPath = Path.Combine(/*TEMP_FOLDER_PATH*/Path.GetTempPath(),
+            string tempPath = Path.Combine(Path.GetTempPath(),
                 string.Format("{0}{1}{2}",
                     name,
                     Path.GetFileNameWithoutExtension(Path.GetRandomFileName()),
