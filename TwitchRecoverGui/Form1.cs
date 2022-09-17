@@ -161,6 +161,7 @@ namespace TwitchRecoverGui
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                MessageBox.Show("Failed. Link invalid or VOD deleted", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             if (success) return;
 
@@ -180,10 +181,14 @@ namespace TwitchRecoverGui
             Cursor = Cursors.WaitCursor;
 
             comboBox1.Items.Clear();
+            comboBox1.ResetText();
+            textBox2.ResetText();
             GetVOD(textBox1.Text);
             if (feeds != null && feeds.GetCount() != 0)
                 comboBox1.Items.AddRange(feeds.getQualities().ToArray());
 
+            if (comboBox1.Items.Count > 0)
+                comboBox1.SelectedIndex = 0;
             Cursor = Cursors.Default;
             Console.WriteLine(s.ElapsedMilliseconds);
         }
@@ -284,7 +289,7 @@ namespace TwitchRecoverGui
             ScriptEdit = true;
             if (int.TryParse(textBox3.Text, out int sc) && sc >= 0)
             {
-                if(sc == 0)
+                if (sc == 0)
                 {
                     sc = 1;
                     textBox3.Text = 1.ToString();
