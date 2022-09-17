@@ -3,6 +3,26 @@
 
 I edited the original repository https://github.com/TwitchRecover/TwitchRecover/ to convert to C#. 
 
+# How to use the GUI
+
+Enter the link on the textbox at the top
+Get feeds with the button
+Select the quality (Source usually is for 1080p)
+The feed for the quality is automatically set ine the textbox below. No need to edit this
+Either download or open in VLC
+
+You can manually set the feed in the Selected feed textbox and download directly
+
+You can stop the download where it currently is and save the video as it is.
+
+You can set partial download to start at a certain time. One chunk is 10 seconds.
+Click on Get duration to get the approximate duration of the feed.
+You can then manually tweak the values to download only the part you want 
+
+![Preview of the GUI](/doc/gui_preview.png))
+
+# Source Readme :
+
 ### Twitch Recover is a free tool that allows you to view, recover and download all types of Twitch videos (VODs, clips, streams and highlights).
   
 ### There are two current versions available, the alpha of the 2.0 version which has 17 different features and the 1.2 version which is the last current stable version.  

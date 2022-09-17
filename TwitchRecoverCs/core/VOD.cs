@@ -70,7 +70,7 @@ namespace TwitchRecoverCs.core
          * @param fe    FileExtension enum representing the desired output file extension.
          * @param feed  string value representing the desired feed to download.
          */
-        public async void downloadVOD(FileExtension fe, string feed, CancellationToken token)
+        public async void downloadVOD(FileExtension fe, string feed, int minChunk, int maxChunk, CancellationToken token)
         {
             computeFN();
             //if (vodInfo == null)
@@ -85,7 +85,7 @@ namespace TwitchRecoverCs.core
             fFP = fp + fn + fe.fileExtension;
             try
             {
-                await Download.m3u8Download(feed, fFP, token);
+                await Download.m3u8Download(feed, fFP, minChunk, maxChunk, token);
             }
             catch (IOException ex)
             {
@@ -97,15 +97,16 @@ namespace TwitchRecoverCs.core
          * This method processes the downloading of a
          * VOD.
          * @param fe    FileExtension enum representing the desired output file extension.
-         * @param feed  string value representing the desired feed to download.
+         * @param minChunk  starting chunk. -1 for disbaled
+         * @param maxChunk  ending chunk. -1 for disbaled
          */
-        public async Task<string> downloadVOD(string feed, CancellationToken token)
+        public async Task<string> downloadVOD(string feed, int minChunk, int maxChunk, CancellationToken token)
         {
             fFP = fp;
             string result = null;
             try
             {
-                result = await Download.m3u8Download(feed, fFP, token);
+                result = await Download.m3u8Download(feed, fFP, minChunk, maxChunk, token);
             }
             catch (IOException ex)
             {

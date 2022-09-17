@@ -67,10 +67,17 @@ namespace TwitchRecoverCs.core.Downloader
         }
 
         private static SortedDictionary<int, FileDestroyer> segmentMap = null;
-        public async static Task<string> m3u8Download(string url, string fp, CancellationToken token)
+        public async static Task<string> m3u8Download(string url, string fp, int minChunk, int maxChunk, CancellationToken token)
         {
             FileHandler.createTempFolder();
             List<string> chunks = M3U8Handler.getChunks(url);
+            // Remove unwanted chunkgs
+            if(minChunk != -1 && maxChunk != -1)
+            {
+                // MinChunk 2 means that we skip 1
+                // MaxChunk 3 means that we take 1,2,3
+                chunks = chunks.Take(maxChunk).Skip(minChunk - 1).ToList();
+            }
             DownloadStarted?.Invoke(url, chunks.Count);
             segmentMap = await TSDownload(chunks, token);
             string result = FileHandler.mergeFile(segmentMap, fp);

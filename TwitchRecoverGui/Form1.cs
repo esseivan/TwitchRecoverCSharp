@@ -32,6 +32,10 @@ namespace TwitchRecoverGui
         private float approxChunkSize_MB = 0;
         private int approxTotalSize_MB = 0;
 
+        private int minChunk = -1;
+        private int maxChunk = -1;
+        private int chunkCount = 0;
+
         private bool ContinueMerge = false;
 
         private CancellationTokenSource cts;
@@ -39,6 +43,7 @@ namespace TwitchRecoverGui
         public Form1()
         {
             InitializeComponent();
+            EditCheckbox1State();
 
             Console.WriteLine("Ready");
 
@@ -59,7 +64,10 @@ namespace TwitchRecoverGui
             vod.setFP(filePath);
             Console.WriteLine("\nDownloading...");
             cts = new CancellationTokenSource();
-            string result = await vod.downloadVOD(feed, cts.Token);
+            if (!(minChunk == -1 && maxChunk == -1))
+                Console.WriteLine(string.Format("Downloading from chunk {0} to {1}", minChunk, maxChunk));
+
+            string result = await vod.downloadVOD(feed, minChunk, maxChunk, cts.Token);
             if (cts.IsCancellationRequested)
             {
                 if (!ContinueMerge)
@@ -198,6 +206,36 @@ namespace TwitchRecoverGui
             if (string.IsNullOrEmpty(textBox2.Text))
                 return;
 
+            List<string> chunks = M3U8Handler.getChunks(textBox2.Text);
+            chunkCount = chunks.Count;
+
+            if (checkBox1.Checked)
+            {
+                if (!int.TryParse(textBox3.Text, out minChunk))
+                {
+                    MessageBox.Show("Starting chunk invalid. Enter an integer value >= 1", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                if (!int.TryParse(textBox4.Text, out maxChunk))
+                {
+                    MessageBox.Show("Ending chunk invalid. Enter an integer value >= 1", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                if (minChunk < 1)
+                    minChunk = 1;
+                if (maxChunk > chunkCount)
+                    maxChunk = chunkCount;
+                if (minChunk > maxChunk) // Invalid values
+                {
+                    MessageBox.Show("Ending chunk must be greater or equal to the starting chunk", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+            else
+            {
+                minChunk = maxChunk = -1;
+            }
+
             // Get save path
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
@@ -266,11 +304,15 @@ namespace TwitchRecoverGui
         private void button7_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(textBox2.Text))
+            {
+                MessageBox.Show("No feed selected !", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
+            }
 
             List<string> chunks = M3U8Handler.getChunks(textBox2.Text);
+            chunkCount = chunks.Count;
             // Each chunk is ~ 10 second
-            TimeSpan duration = TimeSpan.FromSeconds(chunks.Count * 10);
+            TimeSpan duration = TimeSpan.FromSeconds(chunkCount * 10);
             label9.Text = duration.ToString("hh':'mm':'ss");
             dateTimePicker3.Value = new DateTime(2000, 01, 01) + duration;
         }
@@ -278,6 +320,7 @@ namespace TwitchRecoverGui
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
             label9.ResetText();
+            chunkCount = 0;
         }
 
         private bool ScriptEdit = false;
@@ -351,6 +394,19 @@ namespace TwitchRecoverGui
             int chunkCount = (int)Math.Ceiling(et.TotalSeconds / 10);
             textBox4.Text = chunkCount.ToString();
             ScriptEdit = false;
+        }
+
+        private void EditCheckbox1State()
+        {
+            bool isChecked = checkBox1.Checked;
+            dateTimePicker1.Enabled = dateTimePicker2.Enabled = dateTimePicker3.Enabled = isChecked;
+            textBox3.Enabled = textBox4.Enabled = isChecked;
+            label6.Enabled = label7.Enabled = label8.Enabled = label10.Enabled = label11.Enabled = isChecked;
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            EditCheckbox1State();
         }
     }
 }
