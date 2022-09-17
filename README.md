@@ -19,7 +19,7 @@ You can set partial download to start at a certain time. One chunk is 10 seconds
 Click on Get duration to get the approximate duration of the feed.
 You can then manually tweak the values to download only the part you want 
 
-![Preview of the GUI](/doc/gui_preview.png))
+![Preview of the GUI](/doc/preview.png))
 
 # Source Readme :
 
