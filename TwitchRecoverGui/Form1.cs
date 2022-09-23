@@ -237,6 +237,7 @@ namespace TwitchRecoverGui
             }
 
             // Get save path
+            saveFileDialog1.FileName = string.Format("VOD_{0}_{1}.mp4", vod.ChannelName, vod.ID);
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 Download(textBox2.Text, saveFileDialog1.FileName);

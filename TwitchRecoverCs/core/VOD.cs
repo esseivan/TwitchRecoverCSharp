@@ -40,12 +40,16 @@ namespace TwitchRecoverCs.core
         private Feeds feeds;                        //Feeds object corresponding to the VOD.
         private FileExtension fe;                   //Desired output file extension.
         private long VODID;                         //VOD ID of a VOD if it is still up.
+        private string channelName;                 // Channel name, used only for save file default name
         private string[] vodInfo;                   //string array containing the VOD info such as streamer, timestamp, etc.
                                                     //0: Channel name; 1: Stream ID; 2. Timestamp of the start of the stream; 3: Brute force bool.
         private List<string> retrievedURLs;    //Arraylist containing all of the VOD 'chunked' M3U8s of a particular VOD.
         private string fp;                          //string value representing the file path of the output file.
         private string fn;                          //string value representing the file name of the output file.
         private string fFP;                         //string value which represents the final file path of the downloaded object.
+
+        public string ChannelName { get => channelName; set => channelName = value; }
+        public long ID { get => VODID; }
 
         /**
          * The constructor of a
@@ -329,6 +333,7 @@ namespace TwitchRecoverCs.core
         public void retrieveID(string url)
         {
             VODID = VODRetrieval.retrieveID(url);
+            channelName = VODRetrieval.retrieveChannel(url);
         }
 
         /**

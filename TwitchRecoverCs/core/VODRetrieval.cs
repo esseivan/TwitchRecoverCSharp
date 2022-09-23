@@ -99,6 +99,27 @@ namespace TwitchRecoverCs.core
         }
 
         /**
+         * This method retrieves the VODID
+         * from a complete VOD link.
+         * @param url   Twitch VOD link (or raw ID) of a VOD.
+         */
+        public static string retrieveChannel(string url)
+        {
+            if (Compute.singleRegex("(twitch.tv\\/[a-z0-9_]*\\/v\\[0-9]*)", url) != null)
+            {
+                return Compute.singleRegex("twitch.tv\\/([a-zA-Z0-9_]*)\\/v\\/[0-9]*", url);
+            }
+            else if (Compute.singleRegex("(twitch.tv\\/[a-z0-9_]*\\/videos?\\/[0-9]*)", url) != null)
+            {
+                return Compute.singleRegex("twitch.tv\\/([a-z0-9_]*)\\/videos?\\/[0-9]*", url);
+            }
+            else
+            {
+                return "Unknown";
+            }
+        }
+
+        /**
          * This method returns a bool
          * value depending on whether or
          * not an M3U8 has muted segments.
