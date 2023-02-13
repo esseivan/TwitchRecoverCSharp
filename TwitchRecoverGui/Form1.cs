@@ -287,6 +287,7 @@ namespace TwitchRecoverGui
                 return;
             cts.Cancel();
             progressBar1.Value = 0;
+            toolStripStatusLabel2.Text += " - Cancelled !";
         }
 
         private void button6_Click(object sender, EventArgs e)
