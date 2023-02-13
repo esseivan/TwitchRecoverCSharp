@@ -184,6 +184,12 @@ namespace TwitchRecoverGui
 
         private void button1_Click(object sender, EventArgs e)
         {
+            if(string.IsNullOrEmpty(textBox1.Text))
+            {
+                MessageBox.Show("Enter the url to the VOD", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             Stopwatch s = new Stopwatch();
             s.Start();
             Cursor = Cursors.WaitCursor;

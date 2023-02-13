@@ -147,7 +147,13 @@ namespace TwitchRecoverCs.core.Downloader
 
         ~FileDestroyer()
         {
-            Dispose();
+            try
+            {
+                Dispose();
+            }
+            catch (Exception)
+            {
+            }
         }
 
         public void Dispose()
