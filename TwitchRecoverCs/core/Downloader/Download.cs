@@ -184,7 +184,7 @@ namespace TwitchRecoverCs.core.Downloader
                 int finalIndex = index;
 
                 // Wait for room
-                Console.WriteLine("{0} thread(s) available", maxThread.CurrentCount);
+                //Console.WriteLine("{0} thread(s) available", maxThread.CurrentCount);
                 await maxThread.WaitAsync();    // Wait for a thread to be available
                 if (token.IsCancellationRequested)
                     return segmentMap; // Still output the current segment map

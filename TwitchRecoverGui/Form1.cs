@@ -315,6 +315,8 @@ namespace TwitchRecoverGui
             // Each chunk is ~ 10 second
             TimeSpan duration = TimeSpan.FromSeconds(chunkCount * 10);
             label9.Text = duration.ToString("hh':'mm':'ss");
+            // Clear starttime
+            dateTimePicker1.Value = new DateTime(2000, 01, 01);
             dateTimePicker3.Value = new DateTime(2000, 01, 01) + duration;
         }
 
@@ -363,7 +365,7 @@ namespace TwitchRecoverGui
             ScriptEdit = true;
             DateTime dt = dateTimePicker1.Value;
             TimeSpan st = new TimeSpan(dt.Hour, dt.Minute, dt.Second);
-            int chunkCount = (int)Math.Ceiling(st.TotalSeconds / 10);
+            int chunkCount = (int)Math.Ceiling(st.TotalSeconds / 10) + 1;
             textBox3.Text = chunkCount.ToString();
             ScriptEdit = false;
         }
