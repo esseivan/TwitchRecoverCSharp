@@ -1,6 +1,8 @@
 
 # Twitch Recover
 
+# Obsolete. I recommend you https://github.com/besuper/TwitchNoSub
+
 I edited the original repository https://github.com/TwitchRecover/TwitchRecover/ to convert to C# and add a graphical interface
 
 # How to use the GUI
